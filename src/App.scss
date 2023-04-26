@@ -23,23 +23,65 @@ body {
   justify-content: center;
 }
 
+.button {
+  position: fixed;
+  width: 42px;
+  height: 42px;
+  z-index: 1;
+  transition: transform 0.2s ease-in-out;
+
+  &.previous {
+    left: 32px;
+
+    @media (max-width: 768px) {
+      top: 32px;
+      left: auto;
+      transform: rotateZ(90deg);
+    }
+  }
+
+  &.next {
+    right: 32px;
+
+    @media (max-width: 768px) {
+      bottom: 32px;
+      right: auto;
+      transform: rotateZ(90deg);
+    }
+  }
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+
+    @media (max-width: 768px) {
+      transform: rotateZ(90deg) scale(1.2);
+    }
+  }
+}
+
 .card-rail {
   display: flex;
   position: absolute;
-  left: 0;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 }
 
 .card {
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.2s ease-in-out;
   &:hover {
+    cursor: pointer;
     transform: scale(1.1);
   }
 }
 
 .card-container {
-  margin: 0 20px;
+  margin: 20px;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0px 4px 10px 10px rgba(0, 0, 0, 0.17);
@@ -107,6 +149,7 @@ body {
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2;
 }
 
 .focused-card-container {
@@ -122,6 +165,7 @@ body {
   transform-style: preserve-3d;
   transition: transform 200ms ease-out;
   width: 200px;
+  z-index: 3;
   transform: scale(2);
 }
 

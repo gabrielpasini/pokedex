@@ -3,21 +3,24 @@ import axios from "axios";
 import "./App.scss";
 
 const CARD_SCALE = 2;
+const CARD_MARGIN = 20;
+const CARD_WIDTH = 240 + CARD_MARGIN * 2;
+const CARD_HEIGHT = 300 + CARD_MARGIN * 2;
+
+const parallaxRange = 40;
+const isMobile = window.innerWidth < 768;
+const cardsInScreen = Math.floor(
+  isMobile ? window.innerHeight / CARD_HEIGHT : window.innerWidth / CARD_WIDTH
+);
 
 function App() {
+  let timeout;
   const [response, setResponse] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
 
-  useEffect(() => {
-    getMorePokemon();
-  }, []);
-
-  const range = 40;
-  let timeout;
-
   async function getMorePokemon(url) {
     const { data } = await axios.get(
-      url ?? "https://pokeapi.co/api/v2/pokemon?limit=8&offset=0"
+      url ?? `https://pokeapi.co/api/v2/pokemon?limit=${cardsInScreen}&offset=0`
     );
     setResponse(data);
   }
@@ -34,13 +37,8 @@ function App() {
     setResponse({ ...response, results: completedList, completedList: true });
   }
 
-  useEffect(() => {
-    if (response?.results?.length > 0 && !response?.completedList)
-      getCompletedList();
-  }, [response]);
-
   function calcValue(a, b) {
-    return ((a / b) * range - range / 2).toFixed(1);
+    return ((a / b) * parallaxRange - parallaxRange / 2).toFixed(1);
   }
 
   function animate({ x, y, stop = false }) {
@@ -79,11 +77,34 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (response?.results?.length > 0 && !response?.completedList)
+      getCompletedList();
+  }, [response]);
+
+  useEffect(() => {
+    getMorePokemon();
+  }, []);
+
   return (
     <div
       className={`container ${selectedCard ? "overlay" : ""}`}
       onClick={() => selectedCard && stopParallax()}
     >
+      <img
+        className="button previous"
+        src="https://i.imgur.com/GFQg0SD.png"
+        alt=""
+        onClick={() =>
+          response?.results?.[0].id > 0 && getMorePokemon(response?.previous)
+        }
+      />
+      <img
+        className="button next"
+        src="https://i.imgur.com/BdgZ1r7.png"
+        alt=""
+        onClick={() => getMorePokemon(response?.next)}
+      />
       <div className="card-rail">
         {response?.results?.map((pokemon, index) => {
           const { id, name, sprites, types } = pokemon;
@@ -136,7 +157,7 @@ function App() {
           </div>
         </div>
       )}
-      <span className="notice">view on desktop for parallax</span>
+      <span className="notice">view on desktop for parallax and details</span>
       <a className="contact-link" target="_blank" href="https://pasini.dev">
         contact
       </a>
