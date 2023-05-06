@@ -12,7 +12,7 @@ const isMobile = window.innerWidth < 768;
 const cardsInScreen = Math.floor(
   isMobile ? window.innerHeight / CARD_HEIGHT : window.innerWidth / CARD_WIDTH
 );
-const skeleton = new Array(cardsInScreen).fill(null);
+const skeletonItems = new Array(cardsInScreen).fill(null);
 
 function App() {
   let timeout;
@@ -95,7 +95,7 @@ function App() {
     <div className="container" onClick={() => selectedCard && stopParallax()}>
       <img
         className={`button previous ${
-          response?.results?.[0].id === 0 ? "disabled" : ""
+          response?.results?.[0].id === 1 ? "disabled" : ""
         }`}
         src="https://i.imgur.com/GFQg0SD.png"
         alt=""
@@ -116,7 +116,7 @@ function App() {
       />
       <div className="card-rail">
         {loading &&
-          skeleton?.map((_, index) => (
+          skeletonItems?.map((_, index) => (
             <div className="skeleton" key={`skeleton_${index}`} />
           ))}
         {!loading &&
@@ -127,7 +127,9 @@ function App() {
               <div className="card" key={`${name}_${id}`}>
                 <div
                   className="card-container"
-                  onClick={() => !selectedCard && startParallax(index)}
+                  onClick={() =>
+                    !isMobile && !selectedCard && startParallax(index)
+                  }
                 >
                   <p className="number">#{id}</p>
                   <p className="name">{name}</p>
