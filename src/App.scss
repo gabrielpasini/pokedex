@@ -91,6 +91,16 @@ body {
   width: 200px;
 }
 
+.skeleton {
+  margin: 20px;
+  background: linear-gradient(to right bottom, #fff, #fff, #ccc, #ccc);
+  border-radius: 6px;
+  display: inline-block;
+  text-align: left;
+  width: 240px;
+  height: 290px;
+}
+
 .number {
   color: #666;
   font-weight: 600;
@@ -116,7 +126,7 @@ body {
   border-radius: 6px;
   box-shadow: 2px 2px 10px -2px rgba(0, 0, 0, 0.6);
   display: inline-block;
-  height: 100%;
+  height: 200px;
   width: 100%;
   overflow: hidden;
   position: relative;
@@ -148,7 +158,7 @@ body {
   height: 100vh;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.6);
   z-index: 2;
 }
 
@@ -309,4 +319,78 @@ body {
     opacity: 1;
     color: #fff;
   }
+}
+
+.switch-container {
+  width: 200px;
+  height: 28px;
+  cursor: pointer;
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  left: 8px;
+  top: 8px;
+}
+
+.shiny {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 900;
+  margin-left: 8px;
+  color: #fff;
+}
+
+.switch {
+  visibility: hidden;
+  position: absolute;
+  margin-left: -9999px;
+}
+
+.switch + label {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+.flat + label {
+  padding: 2px;
+  width: 60px;
+  height: 28px;
+  background-color: #555;
+  border-radius: 10px;
+  transition: background 0.4s;
+}
+.flat + label:before,
+.flat + label:after {
+  display: block;
+  position: absolute;
+  content: "";
+}
+.flat + label:before {
+  top: 2px;
+  left: 2px;
+  bottom: 2px;
+  right: 2px;
+  background-color: #fff;
+  border-radius: 8px;
+  transition: background 0.4s;
+}
+.flat + label:after {
+  top: 4px;
+  left: 4px;
+  bottom: 4px;
+  width: 30px;
+  background-color: #555;
+  border-radius: 8px;
+  transition: margin 0.4s, background 0.4s;
+}
+.flat:checked + label {
+  background-color: #000;
+}
+.flat:checked + label:after {
+  margin-left: 26px;
+  background-color: #ff0000;
 }

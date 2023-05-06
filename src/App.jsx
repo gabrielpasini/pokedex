@@ -12,17 +12,22 @@ const isMobile = window.innerWidth < 768;
 const cardsInScreen = Math.floor(
   isMobile ? window.innerHeight / CARD_HEIGHT : window.innerWidth / CARD_WIDTH
 );
+const skeleton = new Array(cardsInScreen).fill(null);
 
 function App() {
   let timeout;
   const [response, setResponse] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [shiny, setShiny] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function getMorePokemon(url) {
+    setLoading(true);
     const { data } = await axios.get(
       url ?? `https://pokeapi.co/api/v2/pokemon?limit=${cardsInScreen}&offset=0`
     );
     setResponse(data);
+    setLoading(false);
   }
 
   async function getPokemon(url) {
@@ -87,53 +92,67 @@ function App() {
   }, []);
 
   return (
-    <div
-      className={`container ${selectedCard ? "overlay" : ""}`}
-      onClick={() => selectedCard && stopParallax()}
-    >
+    <div className="container" onClick={() => selectedCard && stopParallax()}>
       <img
-        className="button previous"
+        className={`button previous ${
+          response?.results?.[0].id === 0 ? "disabled" : ""
+        }`}
         src="https://i.imgur.com/GFQg0SD.png"
         alt=""
         onClick={() =>
-          response?.results?.[0].id > 0 && getMorePokemon(response?.previous)
+          response?.results?.[0].id > 1 && getMorePokemon(response?.previous)
         }
       />
       <img
-        className="button next"
+        className={`button next ${
+          response?.results?.[response?.results.length - 1].id ===
+          response?.results.length - 1
+            ? "disabled"
+            : ""
+        }`}
         src="https://i.imgur.com/BdgZ1r7.png"
         alt=""
         onClick={() => getMorePokemon(response?.next)}
       />
       <div className="card-rail">
-        {response?.results?.map((pokemon, index) => {
-          const { id, name, sprites, types } = pokemon;
-          return (
-            <div className="card" key={`${name}_${id}`}>
-              <div
-                className="card-container"
-                onClick={() => !selectedCard && startParallax(index)}
-              >
-                <p className="number">#{id}</p>
-                <p className="name">{name}</p>
-                <div className="card-content">
-                  <div className="card-bg" />
-                  <img
-                    className="card-img"
-                    src={sprites?.front_default}
-                    alt=""
-                  />
-                  <div className="card-text">
-                    {types?.length > 0 &&
-                      types?.map(({ type }) => (
-                        <p className={`card-title ${type.name}`}>{type.name}</p>
-                      ))}
+        {loading &&
+          skeleton?.map((_, index) => (
+            <div className="skeleton" key={`skeleton_${index}`} />
+          ))}
+        {!loading &&
+          response?.results.length &&
+          response?.results?.map((pokemon, index) => {
+            const { id, name, sprites, types } = pokemon;
+            return (
+              <div className="card" key={`${name}_${id}`}>
+                <div
+                  className="card-container"
+                  onClick={() => !selectedCard && startParallax(index)}
+                >
+                  <p className="number">#{id}</p>
+                  <p className="name">{name}</p>
+                  <div className="card-content">
+                    <div className="card-bg" />
+                    <img
+                      className="card-img"
+                      src={
+                        shiny ? sprites?.front_shiny : sprites?.front_default
+                      }
+                      alt=""
+                    />
+                    <div className="card-text">
+                      {types?.length > 0 &&
+                        types?.map(({ type }) => (
+                          <p className={`card-title ${type.name}`}>
+                            {type.name}
+                          </p>
+                        ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
       {selectedCard && (
         <div className="container-overlay">
@@ -144,7 +163,11 @@ function App() {
               <div className="focused-card-bg" />
               <img
                 className="focused-card-img"
-                src={selectedCard.sprites?.front_default}
+                src={
+                  shiny
+                    ? selectedCard?.sprites.front_shiny
+                    : selectedCard?.sprites.front_default
+                }
                 alt=""
               />
               <div className="card-text">
@@ -157,10 +180,22 @@ function App() {
           </div>
         </div>
       )}
+      <div className="switch-container">
+        <input
+          id="flat"
+          className="switch flat"
+          type="checkbox"
+          value={shiny}
+          onChange={() => setShiny(!shiny)}
+        />
+        <label htmlFor="flat" />
+        <span className="shiny">shiny</span>
+      </div>
       <span className="notice">view on desktop for parallax and details</span>
       <a className="contact-link" target="_blank" href="https://pasini.dev">
         contact
       </a>
+      {loading && <div className="container-overlay">Loading...</div>}
     </div>
   );
 }
