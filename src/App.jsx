@@ -72,7 +72,9 @@ function App() {
   }
 
   function startParallax({ focusedIndex, card }) {
-    setSelectedCard(focusedIndex ? response?.results?.[focusedIndex] : card);
+    setSelectedCard(
+      focusedIndex !== undefined ? response?.results?.[focusedIndex] : card
+    );
     document.onmousemove = ({ x, y }) => animate({ x, y });
   }
 
