@@ -17,6 +17,7 @@ const skeletonItems = new Array(cardsInScreen).fill(null);
 function App() {
   let timeout;
   const [search, setSearch] = useState("");
+  const [searched, setSearched] = useState(false);
   const [response, setResponse] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [shiny, setShiny] = useState(false);
@@ -91,12 +92,23 @@ function App() {
       if (search) {
         setLoadingSearch(true);
         const { data: card } = await axios.get(`pokemon/${search}`);
-        card && startParallax({ card });
+        if (card && !isMobile) {
+          startParallax({ card });
+        } else if (card && isMobile) {
+          setSearched(true);
+          setResponse({ results: [card], completedList: true });
+        }
       }
     } finally {
       setSearch("");
       setLoadingSearch(false);
     }
+  }
+
+  async function closeSearch() {
+    stopParallax();
+    setSearched(false);
+    getMorePokemon();
   }
 
   useEffect(() => {
@@ -109,7 +121,7 @@ function App() {
   }, []);
 
   return (
-    <div className="container" onClick={() => selectedCard && stopParallax()}>
+    <div className="container">
       <div className="toolbar">
         <div className="switch-container">
           <input
@@ -131,31 +143,38 @@ function App() {
             onKeyUp={(event) => event.code === "Enter" && searchPokemon()}
           />
           <button className="search-button" onClick={searchPokemon}>
-            <img className="search-icon" src="/assets/search.svg" alt="" />
+            <img className="search-icon" src="/src/assets/search.svg" alt="" />
           </button>
         </div>
       </div>
-      <img
-        className={`button previous ${
-          response?.results?.[0].id === 1 ? "disabled" : ""
-        }`}
-        src="https://i.imgur.com/GFQg0SD.png"
-        alt=""
-        onClick={() =>
-          response?.results?.[0].id > 1 && getMorePokemon(response?.previous)
-        }
-      />
-      <img
-        className={`button next ${
-          response?.results?.[response?.results.length - 1].id ===
-          response?.results.length - 1
-            ? "disabled"
-            : ""
-        }`}
-        src="https://i.imgur.com/BdgZ1r7.png"
-        alt=""
-        onClick={() => getMorePokemon(response?.next)}
-      />
+      {response?.previous && (
+        <img
+          className={"action-button previous"}
+          src="/src/assets/left.svg"
+          alt=""
+          onClick={() =>
+            response?.results?.[0].id > 1 &&
+            response?.previous &&
+            getMorePokemon(response?.previous)
+          }
+        />
+      )}
+      {response?.next && (
+        <img
+          className={"action-button next"}
+          src="/src/assets/right.svg"
+          alt=""
+          onClick={() => response?.next && getMorePokemon(response?.next)}
+        />
+      )}
+      {(searched || selectedCard) && (
+        <img
+          className={"action-button close"}
+          src="/src/assets/close.svg"
+          alt=""
+          onClick={closeSearch}
+        />
+      )}
       <div className="card-rail">
         {loading &&
           skeletonItems?.map((_, index) => (
@@ -189,7 +208,10 @@ function App() {
                     <div className="card-text">
                       {types?.length > 0 &&
                         types?.map(({ type }) => (
-                          <p className={`card-title ${type.name}`}>
+                          <p
+                            className={`card-title ${type.name}`}
+                            key={type.name}
+                          >
                             {type.name}
                           </p>
                         ))}
@@ -226,10 +248,12 @@ function App() {
           </div>
         </div>
       )}
-      <span className="notice">view on desktop for parallax and details</span>
       <a className="contact-link" target="_blank" href="https://pasini.dev">
         contact
       </a>
+      {isMobile && (
+        <span className="notice">view on desktop for parallax and details</span>
+      )}
       {loadingSearch && <div className="container-overlay">Searching...</div>}
     </div>
   );

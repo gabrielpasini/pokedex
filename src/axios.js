@@ -11,7 +11,7 @@ api.interceptors.response.use(
   (error) => {
     if (error?.response?.data) {
       const snackbar = document.getElementById("snackbar");
-      snackbar.innerHTML = `<img src="/assets/search.svg" class="icon"><span class="message">${error.response.data}</span>`;
+      snackbar.innerHTML = `<img src="/src/assets/search.svg" class="icon"><span class="message">${error.response.data}</span>`;
       snackbar.className = "show error";
       setTimeout(function () {
         snackbar.className = snackbar.className.replace("show", "");
