@@ -153,6 +153,7 @@ function App() {
           src="/src/assets/left.svg"
           alt=""
           onClick={() =>
+            !loading &&
             response?.results?.[0].id > 1 &&
             response?.previous &&
             getMorePokemon(response?.previous)
@@ -164,7 +165,9 @@ function App() {
           className={"action-button next"}
           src="/src/assets/right.svg"
           alt=""
-          onClick={() => response?.next && getMorePokemon(response?.next)}
+          onClick={() =>
+            !loading && response?.next && getMorePokemon(response?.next)
+          }
         />
       )}
       {(searched || selectedCard) && (
