@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "./axios";
 import "./App.scss";
 
 const CARD_SCALE = 2;
@@ -16,15 +16,17 @@ const skeletonItems = new Array(cardsInScreen).fill(null);
 
 function App() {
   let timeout;
+  const [search, setSearch] = useState("");
   const [response, setResponse] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [shiny, setShiny] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingSearch, setLoadingSearch] = useState(false);
 
   async function getMorePokemon(url) {
     setLoading(true);
     const { data } = await axios.get(
-      url ?? `https://pokeapi.co/api/v2/pokemon?limit=${cardsInScreen}&offset=0`
+      url ?? `pokemon?limit=${cardsInScreen}&offset=0`
     );
     setResponse(data);
     setLoading(false);
@@ -69,8 +71,8 @@ function App() {
     });
   }
 
-  function startParallax(focusedIndex) {
-    setSelectedCard(response?.results?.[focusedIndex]);
+  function startParallax({ focusedIndex, card }) {
+    setSelectedCard(focusedIndex ? response?.results?.[focusedIndex] : card);
     document.onmousemove = ({ x, y }) => animate({ x, y });
   }
 
@@ -79,6 +81,19 @@ function App() {
       setSelectedCard(null);
       document.onmousemove = undefined;
       animate({ x: 0, y: 0, stop: true });
+    }
+  }
+
+  async function searchPokemon() {
+    try {
+      if (search) {
+        setLoadingSearch(true);
+        const { data: card } = await axios.get(`pokemon/${search}`);
+        card && startParallax({ card });
+      }
+    } finally {
+      setSearch("");
+      setLoadingSearch(false);
     }
   }
 
@@ -93,6 +108,31 @@ function App() {
 
   return (
     <div className="container" onClick={() => selectedCard && stopParallax()}>
+      <div className="toolbar">
+        <div className="switch-container">
+          <input
+            id="flat"
+            className="switch flat"
+            type="checkbox"
+            value={shiny}
+            onChange={() => setShiny(!shiny)}
+          />
+          <label htmlFor="flat" />
+          <span className="shiny">shiny</span>
+        </div>
+        <div className="search-container">
+          <input
+            placeholder="type to search..."
+            className="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            onKeyUp={(event) => event.code === "Enter" && searchPokemon()}
+          />
+          <button className="search-button" onClick={searchPokemon}>
+            <img className="search-icon" src="/assets/search.svg" alt="" />
+          </button>
+        </div>
+      </div>
       <img
         className={`button previous ${
           response?.results?.[0].id === 1 ? "disabled" : ""
@@ -128,7 +168,9 @@ function App() {
                 <div
                   className="card-container"
                   onClick={() =>
-                    !isMobile && !selectedCard && startParallax(index)
+                    !isMobile &&
+                    !selectedCard &&
+                    startParallax({ focusedIndex: index })
                   }
                 >
                   <p className="number">#{id}</p>
@@ -182,22 +224,11 @@ function App() {
           </div>
         </div>
       )}
-      <div className="switch-container">
-        <input
-          id="flat"
-          className="switch flat"
-          type="checkbox"
-          value={shiny}
-          onChange={() => setShiny(!shiny)}
-        />
-        <label htmlFor="flat" />
-        <span className="shiny">shiny</span>
-      </div>
       <span className="notice">view on desktop for parallax and details</span>
       <a className="contact-link" target="_blank" href="https://pasini.dev">
         contact
       </a>
-      {loading && <div className="container-overlay">Loading...</div>}
+      {loadingSearch && <div className="container-overlay">Searching...</div>}
     </div>
   );
 }
