@@ -106,9 +106,12 @@ function App() {
   }
 
   async function closeSearch() {
-    stopParallax();
-    setSearched(false);
-    getMorePokemon();
+    if (isMobile) {
+      setSearched(false);
+      getMorePokemon();
+    } else {
+      stopParallax();
+    }
   }
 
   useEffect(() => {
