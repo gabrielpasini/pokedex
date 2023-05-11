@@ -14,6 +14,8 @@ const cardsInScreen = Math.floor(
 );
 const skeletonItems = new Array(cardsInScreen).fill(null);
 
+const enumStats = ["HP", "ATK", "DEF", "SATK", "SDEF", "SPD"];
+
 function App() {
   let timeout;
   const [search, setSearch] = useState("");
@@ -72,11 +74,15 @@ function App() {
     });
   }
 
-  function startParallax({ focusedIndex, card }) {
+  function selectPokemon({ focusedIndex, card }) {
+    if (isMobile) {
+      setSearched(true);
+    } else {
+      document.onmousemove = ({ x, y }) => animate({ x, y });
+    }
     setSelectedCard(
       focusedIndex !== undefined ? response?.results?.[focusedIndex] : card
     );
-    document.onmousemove = ({ x, y }) => animate({ x, y });
   }
 
   function stopParallax() {
@@ -91,13 +97,10 @@ function App() {
     try {
       if (search) {
         setLoadingSearch(true);
-        const { data: card } = await axios.get(`pokemon/${search}`);
-        if (card && !isMobile) {
-          startParallax({ card });
-        } else if (card && isMobile) {
-          setSearched(true);
-          setResponse({ results: [card], completedList: true });
-        }
+        const { data: card } = await axios.get(
+          `pokemon/${search.replace(/ /g, "-")}`
+        );
+        if (card) selectPokemon({ card });
       }
     } finally {
       setSearch("");
@@ -106,11 +109,10 @@ function App() {
   }
 
   async function closeSearch() {
+    stopParallax();
     if (isMobile) {
       setSearched(false);
       getMorePokemon();
-    } else {
-      stopParallax();
     }
   }
 
@@ -195,13 +197,11 @@ function App() {
                 <div
                   className="card-container"
                   onClick={() =>
-                    !isMobile &&
-                    !selectedCard &&
-                    startParallax({ focusedIndex: index })
+                    !selectedCard && selectPokemon({ focusedIndex: index })
                   }
                 >
                   <p className="number">#{id}</p>
-                  <p className="name">{name}</p>
+                  <p className="name">{name.replace(/-/g, " ")}</p>
                   <div className="card-content">
                     <div className="card-bg" />
                     <img
@@ -232,8 +232,8 @@ function App() {
         <div className="container-overlay">
           <div className="focused-card-container">
             <p className="number">#{selectedCard.id}</p>
-            <p className="name">{selectedCard.name}</p>
-            <div className="card-content">
+            <p className="name">{selectedCard.name.replace(/-/g, " ")}</p>
+            <div className="card-content focused">
               <div className="focused-card-bg" />
               <img
                 className="focused-card-img"
@@ -244,12 +244,38 @@ function App() {
                 }
                 alt=""
               />
-              <div className="card-text">
+            </div>
+            <div className="card-details">
+              <>
                 {selectedCard.types?.length > 0 &&
-                  selectedCard.types?.map(({ type }) => (
-                    <p className={`card-title ${type.name}`}>{type.name}</p>
+                  selectedCard.types?.map(({ type }, index) => (
+                    <p className={`card-title ${type.name}`} key={index}>
+                      {type.name}
+                    </p>
                   ))}
+              </>
+              <div className="card-info">
+                <div>
+                  <img src="/src/assets/height.svg" />
+                  <span>{selectedCard.height / 10}m</span>
+                </div>
+                <div>
+                  <img src="/src/assets/weight.svg" />
+                  <span>{selectedCard.weight / 10}kg</span>
+                </div>
               </div>
+              {selectedCard.stats.map((stat, index) => (
+                <div className="stats-line" key={index}>
+                  <span className="title">{enumStats[index]}</span>
+                  <div className="bar background">
+                    <div
+                      className={`bar ${selectedCard.types[0].type.name}`}
+                      style={{ width: stat.base_stat / 2 }}
+                    />
+                  </div>
+                  <span className="value">{stat.base_stat}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -257,9 +283,7 @@ function App() {
       <a className="contact-link" target="_blank" href="https://pasini.dev">
         contact
       </a>
-      {isMobile && (
-        <span className="notice">view on desktop for parallax and details</span>
-      )}
+      {isMobile && <span className="notice">view on desktop for parallax</span>}
       {loadingSearch && <div className="container-overlay">Searching...</div>}
     </div>
   );
