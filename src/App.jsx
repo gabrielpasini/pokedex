@@ -19,7 +19,6 @@ const enumStats = ["HP", "ATK", "DEF", "SATK", "SDEF", "SPD"];
 function App() {
   let timeout;
   const [search, setSearch] = useState("");
-  const [searched, setSearched] = useState(false);
   const [response, setResponse] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [shiny, setShiny] = useState(false);
@@ -75,9 +74,7 @@ function App() {
   }
 
   function selectPokemon({ focusedIndex, card }) {
-    if (isMobile) {
-      setSearched(true);
-    } else {
+    if (!isMobile) {
       document.onmousemove = ({ x, y }) => animate({ x, y });
     }
     setSelectedCard(
@@ -85,11 +82,13 @@ function App() {
     );
   }
 
-  function stopParallax() {
+  function closeSearch() {
     if (selectedCard) {
       setSelectedCard(null);
-      document.onmousemove = undefined;
-      animate({ x: 0, y: 0, stop: true });
+      if (!isMobile) {
+        document.onmousemove = undefined;
+        animate({ x: 0, y: 0, stop: true });
+      }
     }
   }
 
@@ -103,16 +102,7 @@ function App() {
         if (card) selectPokemon({ card });
       }
     } finally {
-      setSearch("");
       setLoadingSearch(false);
-    }
-  }
-
-  async function closeSearch() {
-    stopParallax();
-    if (isMobile) {
-      setSearched(false);
-      getMorePokemon();
     }
   }
 
@@ -175,7 +165,7 @@ function App() {
           }
         />
       )}
-      {(searched || selectedCard) && (
+      {selectedCard && (
         <img
           className={"action-button close"}
           src="/assets/close.svg"
@@ -229,7 +219,7 @@ function App() {
           })}
       </div>
       {selectedCard && (
-        <div className="container-overlay">
+        <div className="container-overlay selected">
           <div className="focused-card-container">
             <p className="number">#{selectedCard.id}</p>
             <p className="name">{selectedCard.name.replace(/-/g, " ")}</p>

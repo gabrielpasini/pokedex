@@ -15,7 +15,7 @@ api.interceptors.response.use(
       snackbar.className = "show error";
       setTimeout(function () {
         snackbar.className = snackbar.className.replace("show", "");
-      }, 5000);
+      }, 3000);
     }
     return Promise.reject(error);
   }
