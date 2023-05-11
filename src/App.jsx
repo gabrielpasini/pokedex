@@ -148,14 +148,14 @@ function App() {
             onKeyUp={(event) => event.code === "Enter" && searchPokemon()}
           />
           <button className="search-button" onClick={searchPokemon}>
-            <img className="search-icon" src="/src/assets/search.svg" alt="" />
+            <img className="search-icon" src="/assets/search.svg" alt="" />
           </button>
         </div>
       </div>
       {response?.previous && (
         <img
           className={"action-button previous"}
-          src="/src/assets/left.svg"
+          src="/assets/left.svg"
           alt=""
           onClick={() =>
             !loading &&
@@ -168,7 +168,7 @@ function App() {
       {response?.next && (
         <img
           className={"action-button next"}
-          src="/src/assets/right.svg"
+          src="/assets/right.svg"
           alt=""
           onClick={() =>
             !loading && response?.next && getMorePokemon(response?.next)
@@ -178,7 +178,7 @@ function App() {
       {(searched || selectedCard) && (
         <img
           className={"action-button close"}
-          src="/src/assets/close.svg"
+          src="/assets/close.svg"
           alt=""
           onClick={closeSearch}
         />
@@ -256,11 +256,11 @@ function App() {
               </>
               <div className="card-info">
                 <div>
-                  <img src="/src/assets/height.svg" />
+                  <img src="/assets/height.svg" />
                   <span>{selectedCard.height / 10}m</span>
                 </div>
                 <div>
-                  <img src="/src/assets/weight.svg" />
+                  <img src="/assets/weight.svg" />
                   <span>{selectedCard.weight / 10}kg</span>
                 </div>
               </div>
