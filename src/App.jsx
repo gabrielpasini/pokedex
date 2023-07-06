@@ -134,8 +134,12 @@ function App() {
             placeholder="type to search..."
             className="search"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            onKeyUp={(event) => event.code === "Enter" && searchPokemon()}
+            onChange={(event) =>
+              setSearch(
+                event.target.value.toLowerCase().replace(/[^a-z0-9 ]/g, "")
+              )
+            }
+            onKeyUp={(event) => event.keyCode === 13 && searchPokemon()}
           />
           <button className="search-button" onClick={searchPokemon}>
             <img className="search-icon" src="/assets/search.svg" alt="" />
